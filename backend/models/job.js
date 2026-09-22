@@ -1,4 +1,4 @@
-const mongoose = require('mongoose')
+import mongoose from "mongoose"
 
 const jobSchema = mongoose.Schema({
     company:{type:String,required:true},
@@ -11,4 +11,4 @@ const jobSchema = mongoose.Schema({
     dateApplied:{type:Date,default:Date.now}
 })
 
-module.exports = mongoose.model('job',jobSchema)
+export default mongoose.model('Job',jobSchema)

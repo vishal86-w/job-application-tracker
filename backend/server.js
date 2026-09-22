@@ -1,12 +1,14 @@
-require('dotenv').config()
-const express = require('express')
-const mongoose = require('mongoose')
+import 'dotenv/config'
+import express from 'express'
+import mongoose from 'mongoose'
 
-const Job = require('./models/job')
+import jobRoutes from './routes/jobRoutes.js'
 
 const app = express()
 
 app.use(express.json())
+
+app.use('/api/jobs',jobRoutes)
 
 mongoose.connect(process.env.MONGO_URI)
     .then(()=>console.log("Connected to mongoDb"))
@@ -16,27 +18,3 @@ app.listen(5000,()=>{
     console.log('Server is running on port 5000')
 })
 
-
-//post new job
-app.post('/api/jobs',async (req,res)=>{
-    const newJob = await Job.create(req.body)    
-    res.status(201).json(newJob)
-})
-
-//get all job
-app.get('/api/jobs',async (req,res)=>{
-    const jobs = await Job.find({})
-    res.status(200).json(jobs)
-})
-
-//delete a job by id
-app.delete('/api/jobs/:id',async(req,res)=>{
-    const deleteJob = await Job.findByIdAndDelete(req.params.id)
-    res.status(200).json({message:'Job successfully deleted'})
-})
-
-//update job by id
-app.put('/api/jobs/:id',async (req,res)=>{
-    const updatedJob = await Job.findByIdAndUpdate(req.params.id,req.body,{new:true})
-    res.status(200).json(updatedJob)
-})
