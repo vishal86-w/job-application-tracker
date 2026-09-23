@@ -1,5 +1,6 @@
 import express from 'express'
 import {getJobs, postNewJob, deleteJobById, updateJobById} from '../controllers/jobController.js'
+import auth from '../middleware/authMiddleWare.js'
 
 const router = express.Router()
 
@@ -7,7 +8,7 @@ const router = express.Router()
 router.get('/',getJobs)
 
 //add new job
-router.post('/',postNewJob)
+router.post('/',auth,postNewJob)
 
 //update job by id
 router.put('/:id',updateJobById)
