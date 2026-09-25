@@ -5,15 +5,15 @@ import auth from '../middleware/authMiddleWare.js'
 const router = express.Router()
 
 //get all jobs
-router.get('/',getJobs)
+router.get('/',auth,getJobs)
 
 //add new job
 router.post('/',auth,postNewJob)
 
 //update job by id
-router.put('/:id',updateJobById)
+router.put('/:id',auth,updateJobById)
 
 //delete job by id
-router.delete('/:id',deleteJobById)
+router.delete('/:id',auth,deleteJobById)
 
 export default router
