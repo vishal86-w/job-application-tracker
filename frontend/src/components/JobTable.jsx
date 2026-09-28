@@ -1,5 +1,10 @@
 
-const JobTable = ({handleEdit,handleSort,getSortIcon,getBadgeColor,sortedJobs,setJobToDelete}) => {
+const JobTable = ({inputref,setJobToEdit,handleSort,getSortIcon,getBadgeColor,sortedJobs,setJobToDelete}) => {
+
+  const handleEdit = (job) => {
+        setJobToEdit(job)
+        setTimeout(() => inputref.current?.focus(), 500)
+    }
   return (
     <>
     <table className="table table-hover ">
@@ -22,8 +27,8 @@ const JobTable = ({handleEdit,handleSort,getSortIcon,getBadgeColor,sortedJobs,se
                 <td><span className={`badge ${getBadgeColor(job.status)}`}>{job.status}</span></td>
                 <td>{new Date(job.dateApplied).toLocaleDateString('en-GB')}</td>
                 <td>
-                  <button type='button' className="btn btn-danger me-2" data-bs-target="#deleteModal" data-bs-toggle="modal" onClick={() => setJobToDelete(job._id)}>delete</button>
                   <button type='button' className="btn btn-success" data-bs-toggle="modal" data-bs-target="#formModal" onClick={() => handleEdit(job)}>Edit</button>
+                  <button type='button' className="btn btn-danger mx-2" data-bs-target="#deleteModal" data-bs-toggle="modal" onClick={() => setJobToDelete(job._id)}>delete</button>
                 </td>
 
               </tr>

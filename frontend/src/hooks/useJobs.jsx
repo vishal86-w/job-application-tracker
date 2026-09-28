@@ -1,23 +1,24 @@
-import axios from "axios"
 import { useEffect, useState } from "react"
+import api from "../config/axiosConfig"
 
 
 const useJobs = () => {
      const [jobs, setJobs] = useState([])
      const [isLoading, setIsLoading] = useState(true)
+     // eslint-disable-next-line no-unused-vars
      const [error, setError] = useState('')
 
 useEffect(() => {
-    axios.get('/api/jobs')
+    api.get('/api/jobs')
       .then((response) => {
-        setJobs(response.data)
+        setJobs(response.data.jobs)
         setIsLoading(false)
       })
       .catch(() => setIsLoading(false))
   }, [])
 
   const handleDelete = (id) => {
-    return axios.delete(`/api/jobs/${id}`)
+    return api.delete(`/api/jobs/${id}`)
       .then(() => {
         setJobs(jobs.filter((job) => job._id !== id))
       })
@@ -25,7 +26,7 @@ useEffect(() => {
   }
 
   const addJob=(jobData)=>{
-    return axios.post('/api/jobs', jobData)
+    return api.post('/api/jobs', jobData)
         .then((response) => {
           setJobs([...jobs, response.data])    
         })
@@ -33,7 +34,7 @@ useEffect(() => {
   }
 
   const editJob =(jobData,id)=>{
-    return axios.put(`/api/jobs/${id}`, jobData)
+    return api.put(`/api/jobs/${id}`, jobData)
         .then((response) => {
           setJobs(jobs.map((job) => job._id === id ? response.data : job))
          

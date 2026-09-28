@@ -1,6 +1,127 @@
-const JobModal = ({handleSubmit,editingId,handleModalButton,closeButtonRef,inputref,company,setCompany,setFormErrors,formErrors,position,setPosition,setStatus,date,setErrorToast,handleDelete,jobToDelete,setDate}) => {
+import { useRef, useState } from "react"
+
+const JobModal = ({ inputref,jobToDelete ,jobToEdit,setJobToEdit,addJob, editJob,handleDelete}) => {
+
+   
+   const [company, setCompany] = useState('')
+    const [position, setPosition] = useState('')
+    const [status, setStatus] = useState('Applied')
+    const [date, setDate] = useState('')
+
+    const [editingId, setEditingId] = useState(null)
+    const [successMessage, setSuccessMessage] = useState('')
+    const [errorToast, setErrorToast] = useState('')
+    
+     const [prevJobId,setPrevJobId] = useState(null)
+         const closeButtonRef = useRef(null)
+         const [formErrors, setFormErrors] = useState({})
+     
+ const handleSubmit = (e) => {
+    e.preventDefault()
+
+     let newErrors = {}
+    //validation
+    if (company === '') {
+      newErrors.company = 'Please fill the company Name.'
+
+    }
+    if (position === '') {
+      newErrors.position = 'Please fill the position.'
+    }
+    if (Object.keys(newErrors).length > 0) {
+      setFormErrors(newErrors)
+      return
+    } else {
+      setFormErrors('')
+
+    }
+
+    if (editingId) {
+      editJob({ company, position, status, dateApplied: date || new Date().toISOString() }, editingId)
+        .then(() => {
+          closeButtonRef.current.click()
+          setPrevJobId(editingId)
+          setCompany('')
+          setPosition('')
+          setEditingId(null)
+          setSuccessMessage('Job successfully edited!')
+          setTimeout(() => { setSuccessMessage('') }, 3000)
+        })
+        .catch(() => {
+          setErrorToast('Failed to edit job.')
+          setTimeout(() => { setErrorToast('') }, 5000)
+        })
+
+    }
+    else {
+      addJob({ company, position, status, dateApplied: date || new Date().toISOString() })
+        .then(() => {
+
+          closeButtonRef.current.click()
+          setSuccessMessage('Job successfully added!')
+          setCompany('')
+          setPosition('')
+          setTimeout(() => { setSuccessMessage('') }, 3000)
+        }
+        )
+        .catch(() => {
+          setErrorToast('Failed to add new job.')
+          setTimeout(() => { setErrorToast('') }, 5000)
+        })
+
+    }
+
+  }
+
+ if(jobToEdit && jobToEdit._id !== prevJobId){
+      setPrevJobId(jobToEdit._id)
+      setCompany(jobToEdit.company)
+      setPosition(jobToEdit.position)
+      setFormErrors({})
+      setEditingId(jobToEdit._id)
+      setDate(jobToEdit.dateApplied ? jobToEdit.dateApplied.split('T')[0] : '')
+      setStatus(jobToEdit.status)
+    }
+
+    
+
+  const handleModalButton = () => {
+    setTimeout(() => inputref.current.focus(), 500)
+    setEditingId(null)
+    setJobToEdit(null)
+    setPrevJobId(null)
+    setCompany('')
+    setPosition('')
+    setFormErrors({})
+    setStatus('Applied')
+    setDate('')
+  }
+
+    //end
     return (
         <>
+
+         {successMessage !== '' &&
+        <div className="toast show  position-fixed text-bg-primary border-0 top-0 start-50 translate-middle-x mt-3" style={{ zIndex: 1060 }} role="alert" aria-live="assertive" aria-atomic="true">
+          <div className="d-flex">
+            <div className="toast-body">
+              {successMessage}
+            </div>
+            <button type="button" className="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+        </div>
+      }
+      {errorToast !== '' &&
+        <div className="toast show  position-fixed text-bg-danger border-0 top-0 start-50 translate-middle-x mt-3" style={{ zIndex: 1060 }} role="alert" aria-live="assertive" aria-atomic="true">
+          <div className="d-flex">
+            <div className="toast-body">
+              {errorToast}
+            </div>
+            <button type="button" className="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+        </div>
+      }
+
             <button type="button" className="btn btn-primary m-2" onClick={handleModalButton} data-bs-toggle="modal" data-bs-target="#formModal">
                 Add new Job
             </button>
@@ -72,6 +193,6 @@ const JobModal = ({handleSubmit,editingId,handleModalButton,closeButtonRef,input
 
         </>
     )
-}
-
+  
+  }
 export default JobModal
