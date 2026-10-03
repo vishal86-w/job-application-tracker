@@ -1,5 +1,6 @@
-import axios from "axios"
+
 import {  useState } from "react"
+import api from "../config/axiosConfig"
 
 const useAuth = () => {
     const [isLoading,setIsLoading] = useState(false)
@@ -9,11 +10,11 @@ const useAuth = () => {
         setIsLoading(true)
         setError('')
         try{
-            const response = await axios.post('/api/users/login',credentials)
-            localStorage.setItem('jwttoken',response.data.token)     
+            const response = await api.post('/api/users/login',credentials)
         }
         catch(err){
             setError(err.response.data.message)
+            throw err
         }
         finally{
             setIsLoading(false)
@@ -24,7 +25,7 @@ const useAuth = () => {
         setIsLoading(true)
         setError('')
         try{
-            await axios.post('/api/users/register',credentials)
+            await api.post('/api/users/register',credentials)
 
             //auto login
             await loginUser(credentials)
@@ -36,7 +37,16 @@ const useAuth = () => {
             setIsLoading(false)
         }
     }
-  return {isLoading,setIsLoading,error,setError,loginUser,registerUser}
+
+    const logoutUser =()=>{
+        try{
+            api.post('/api/users/logout')
+        }catch(err){
+            console.log(err);
+            
+        }
+    }
+  return {isLoading,setIsLoading,error,setError,loginUser,registerUser,logoutUser}
 }
 
 export default useAuth

@@ -1,12 +1,31 @@
+import { useEffect } from 'react'
+import { useState } from 'react'
 import {Navigate,Outlet} from 'react-router-dom'
+import api from '../config/axiosConfig'
 const ProtectedRoute = () => {
-    const token = localStorage.getItem('jwttoken')
+    
+  const [isAuthorised,setIsAuthorised] = useState(false)
+  const [isLoading,setIsLoading] = useState(true)
 
-    if(!token){
-        return <Navigate to='/login' replace/>
+  useEffect(()=>{
+    const verifyUser = async ()=>{
+      try{
+        await api.get('/api/users/profile')
+        setIsAuthorised(true)
+      }catch(err){
+        setIsAuthorised(false)
+      }finally{
+        setIsLoading(false)
+      }
     }
+    verifyUser()
+  },[])
 
-  return <Outlet/>
+  if(isLoading){
+    return <div>Loading</div>
+  }
+
+  return isAuthorised ? <Outlet/> : <Navigate to={'/login'} replace/>
 }
 
 export default ProtectedRoute

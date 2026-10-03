@@ -9,11 +9,39 @@ const Register = () => {
     const [email,setEmail] = useState('')
     const [password,setPassword] = useState('')
     const navigate = useNavigate()
-
+    const [formErrors, setFormErrors] = useState({})
+    const [error,setError] = useState('')
+    
+    
     const handleSubmit=async(e)=>{
         e.preventDefault()
-        await registerUser({firstName,lastName,email,password})
-        navigate('/dashboard')
+        const newErrors ={}
+        if(firstName===''){
+            newErrors.firstName='Please enter your first name.'
+        }
+        if(lastName===''){
+            newErrors.lastName='Please enter your last name.'
+        }
+        if(firstName===''){
+            newErrors.email='Please enter your email.'
+        }
+        if(firstName===''){
+            newErrors.password='Please enter your password.'
+        }
+        if(Object.keys(newErrors).length>0){
+            setFormErrors(newErrors)
+            return
+        }
+        else{
+            setFormErrors('')
+        }
+        try{
+            await registerUser({firstName,lastName,email,password})
+            navigate('/dashboard')
+        }
+        catch(err){
+            // setError('')
+        }
         
     }
     return (
@@ -28,22 +56,42 @@ const Register = () => {
                             <div className="mb-3">
                                 <label htmlFor="InputFirstName" className="form-label">First Name</label>
                                 <input type="text" className="form-control" id="InputFirstName" value={firstName}
-                                    onChange={(e) => setFirstName(e.target.value)} />
+                                    onChange={(e) =>{
+                                        setFirstName(e.target.value)
+                                        setFormErrors({...formErrors,firstName:''})
+                                    } } />
+                                {formErrors.firstName && <span className='text-danger'>{formErrors.firstName}<br /></span>}
+
                             </div>
-                            <div class="mb-3">
+                            <div className="mb-3">
                                 <label htmlFor="InputLastName" className="form-label">Last Name</label>
                                 <input type="text" className="form-control" id="InputLastName" value={lastName}
-                                    onChange={(e) => setLastName(e.target.value)} />
+                                    onChange={(e) => {
+                                        setLastName(e.target.value)
+                                        setFormErrors({...formErrors,lastName:''})
+                                    }} />
+                             {formErrors.lastName && <span className='text-danger'>{formErrors.lastName}<br /></span>}
+
                             </div>
                             <div className="mb-3">
                                 <label htmlFor="InputEmail" className="form-label">Email address</label>
                                 <input type="email" className="form-control" id="InputEmail" aria-describedby="emailHelp" value={email}
-                                    onChange={(e) => setEmail(e.target.value)} />
+                                    onChange={(e) => {
+                                        setEmail(e.target.value)
+                                        setFormErrors({...formErrors,email:''})
+                                        }} />
+                                        {formErrors.email && <span className='text-danger'>{formErrors.email}<br /></span>}
+
                             </div>
                             <div className="mb-3">
                                 <label htmlFor="InputPassword" className="form-label">Password</label>
                                 <input type="password" className="form-control" id="InputPassword" value={password}
-                                    onChange={(e) => setPassword(e.target.value)} />
+                                    onChange={(e) => {
+                                        setPassword(e.target.value)
+                                        setFormErrors({...formErrors,password:''})
+                                    }} />
+                                    {formErrors.password && <span className='text-danger'>{formErrors.password}<br /></span>}
+
                             </div>
                             <button type="submit" className="btn btn-primary">Submit</button>
                         </form>

@@ -1,171 +1,182 @@
-import { useState, useRef } from 'react'
-import useJobs from '../hooks/useJobs.jsx'
-import JobTable from '../components/JobTable.jsx'
-import JobModal from '../components/JobModal.jsx'
+    import { useState, useRef, useEffect } from 'react'
+    import useJobs from '../hooks/useJobs.jsx'
+    import JobTable from '../components/JobTable.jsx'
+    import JobModal from '../components/JobModal.jsx'
+    import Pagination from '../components/Pagination.jsx'
+import useAuth from '../hooks/useAuth.jsx'
+import { useNavigate } from 'react-router-dom'
+import Spinner from '../components/Spinner.jsx'
 
 
-const Dashboard = () => {
+    const Dashboard = () => {
 
+        const [currentPage,setCurrentPage] = useState(1)
+        const [sortKey, setSortKey] = useState(null)
+        const [sortDirection, setSortDirection] = useState('asc')
+        const [filterStatus, setFilterStatus] = useState('All')
+        const [searchTerm, setSearchTerm] = useState('')
+        const [debouncedSearchTerm,setDebouncedSearchTerm] = useState('')
+        
+        const { jobs, isLoading , addJob, editJob,handleDelete,totalPages,totalAppliedJob,totalInterviewingJob,totalRejectedJob} = useJobs(currentPage,setCurrentPage,sortKey,sortDirection, debouncedSearchTerm, filterStatus)
+        const{logoutUser}=useAuth()
+        const [jobToDelete, setJobToDelete] = useState(null)
+        const [jobToEdit, setJobToEdit] = useState(null)
+        const navigate = useNavigate()
+        const isFiltering = searchTerm!=='' || filterStatus!=='All'
+        
+        const inputref = useRef(null)
 
-    const { jobs, isLoading , addJob, editJob,handleDelete} = useJobs()
-    const [jobToDelete, setJobToDelete] = useState(null)
-    const [filterStatus, setFilterStatus] = useState('All')
-    const [searchTerm, setSearchTerm] = useState('')
+        useEffect(() => {
+        const timerId = setTimeout(() => {
+        setDebouncedSearchTerm(searchTerm)
+        }, 500)
 
-    const [jobToEdit, setJobToEdit] = useState(null)
+        return () => clearTimeout(timerId)
+        }, [searchTerm])
 
-
-    
-
-    const [sortKey, setSortKey] = useState(null)
-    const [sortDirection, setSortDirection] = useState('asc')
-
-    const inputref = useRef(null)
-
-
-    const handleSort = (key) => {
-        if (key === sortKey) {
-            if (sortDirection === 'asc') {
-                setSortDirection('desc')
-            } else {
+        const handleSort = (key) => {
+            if (key === sortKey) {
+                if (sortDirection === 'asc') {
+                    setSortDirection('desc')
+                } else {
+                    setSortDirection('asc')
+                }
+            }
+            else {
                 setSortDirection('asc')
+                setSortKey(key)
             }
         }
-        else {
-            setSortDirection('asc')
-            setSortKey(key)
+
+
+
+
+        
+
+        const getBadgeColor = (status) => {
+            if (status === 'Applied') {
+                return 'text-bg-primary'
+            }
+            else if (status === 'Interviewing') {
+                return 'text-bg-warning'
+            }
+            else if (status === 'Rejected') {
+                return 'text-bg-danger'
+            }
         }
-    }
 
-
-
-    const filteredJobs = jobs.filter((job) => (job.company.toLowerCase().includes(searchTerm.toLowerCase()) || job.position.toLowerCase().includes(searchTerm.toLowerCase())) && (filterStatus === 'All' || job.status === filterStatus))
-
-    const sortedJobs = [...filteredJobs].sort((a, b) => {
-        if (sortKey === 'company') {
-            if (sortDirection === 'asc') {
-                return a.company.localeCompare(b.company)
+        const getSortIcon = (columnName) => {
+            if (columnName === sortKey) {
+                if (sortDirection === 'asc') {
+                    return <i className="bi bi-caret-up-fill"></i>
+                }
+                else {
+                    return <i className="bi bi-caret-down-fill"></i>
+                }
             }
             else {
-                return b.company.localeCompare(a.company)
+                return <i className="bi bi-arrow-down-up"></i>
             }
         }
-        if (sortKey === 'date') {
-            if (sortDirection === 'asc') {
-                return a.dateApplied.localeCompare(b.dateApplied)
-            }
-            else {
-                return b.dateApplied.localeCompare(a.dateApplied)
-            }
+
+        const handleLogout =async()=>{
+           await logoutUser()
+           navigate('/login')
         }
-        return 0
-    })
-
-    const getBadgeColor = (status) => {
-        if (status === 'Applied') {
-            return 'text-bg-primary'
+        const handleProfile =()=>{
+            navigate('/profile')
         }
-        else if (status === 'Interviewing') {
-            return 'text-bg-warning'
-        }
-        else if (status === 'Rejected') {
-            return 'text-bg-danger'
-        }
-    }
 
-    const getSortIcon = (columnName) => {
-        if (columnName === sortKey) {
-            if (sortDirection === 'asc') {
-                return <i className="bi bi-caret-up-fill"></i>
-            }
-            else {
-                return <i className="bi bi-caret-down-fill"></i>
-            }
-        }
-        else {
-            return <i className="bi bi-arrow-down-up"></i>
-        }
-    }
-
-    const interviewingCount = jobs.filter((job) => (job.status === 'Interviewing')).length
-    const appliedCount = jobs.filter((job) => (job.status === 'Applied')).length
-    const rejectedCount = jobs.filter((job) => (job.status === 'Rejected')).length
+        return (
+            <>
+                <h1 className='text-danger'>Job Application Tracker</h1>
+                <div className="d-flex justify-content-center">
+                    <input className="form-control w-50 " type="text" placeholder="Search here..." onChange={(e) => {
+                        setSearchTerm(e.target.value)
+                        setCurrentPage(1)
+                    }} value={searchTerm} />
+                    <select type="text" className='form-select w-25 mx-2' value={filterStatus} onChange={(e) => {
+                        setFilterStatus(e.target.value)
+                        setCurrentPage(1)
+                    }} >
+                        <option value="All">All</option>
+                        <option value="Applied">Applied</option>
+                        <option value="Interviewing">Interviewing</option>
+                        <option value="Rejected">Rejected</option>
+                    </select>
+                    <button className='btn'onClick={()=>handleProfile()}>Profile</button>
+                    <button className='btn' onClick={()=>handleLogout()}>Log out</button>
+                </div>
 
 
-    
-
-    return (
-        <>
-            <h1 className='text-danger'>Job Application Tracker</h1>
-            <div className="d-flex justify-content-center">
-                <input className="form-control w-50 " type="text" placeholder="Search here..." onChange={(e) => setSearchTerm(e.target.value)} value={searchTerm} />
-                <select type="text" className='form-select w-25 mx-2' value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} >
-                    <option value="All">All</option>
-                    <option value="Applied">Applied</option>
-                    <option value="Interviewing">Interviewing</option>
-                    <option value="Rejected">Rejected</option>
-                </select>
-            </div>
-
-
-            <JobModal               
-                inputref={inputref}
-                jobToEdit={jobToEdit}
-                setJobToEdit={setJobToEdit}
-                addJob = {addJob}
-                editJob={editJob}
-                jobToDelete={jobToDelete}
-                handleDelete={handleDelete}
-            />
-
-
-
-            {isLoading && <p className='text-secondary mt-4'>Loading...</p>}
-
-            <div className="d-flex justify-content-center">
-                {appliedCount > 0 &&
-                    <div className="card text-bg-primary mb-3 mx-2" style={{ maxWidth: '18rem' }}>
-
-                        <div className="card-body ">
-                            <h5 className="card-title h3">Applied : {appliedCount}</h5>
-                        </div>
-                    </div>
-                }
-
-                {interviewingCount > 0 &&
-                    <div className="card text-bg-warning mb-3 me-2" style={{ maxWidth: '18rem' }}>
-                        <div className="card-body ">
-                            <h5 className="card-title h3">Interviewing : {interviewingCount}</h5>
-                        </div>
-                    </div>
-                }
-                {rejectedCount > 0 &&
-                    <div className="card text-bg-danger mb-3" style={{ maxWidth: '18rem' }}>
-                        <div className="card-body ">
-                            <h5 className="card-title h3">Rejected : {rejectedCount}</h5>
-                        </div>
-                    </div>
-                }
-
-            </div>
-            {jobs.length === 0 && !isLoading && <p className='text-muted mt-4  text-center'>No jobs applied yet. Add your first one!</p>}
-
-            {
-                jobs.length > 0 &&
-                <JobTable
-                    sortedJobs={sortedJobs}
+                <JobModal               
                     inputref={inputref}
+                    jobToEdit={jobToEdit}
                     setJobToEdit={setJobToEdit}
-                    handleSort={handleSort}
-                    setJobToDelete={setJobToDelete}
-                    getBadgeColor={getBadgeColor}
-                    getSortIcon={getSortIcon}
+                    addJob = {addJob}
+                    editJob={editJob}
+                    jobToDelete={jobToDelete}
+                    handleDelete={handleDelete}
                 />
-            }
-        </>
-    )
-}
+
+                {isLoading && <p className='text-secondary mt-4'><Spinner/> Loading...</p>}
+
+                <div className="d-flex justify-content-center">
+                    {totalAppliedJob > 0 &&
+                        <div className="card text-bg-primary mb-3 mx-2" style={{ maxWidth: '18rem' }}>
+
+                            <div className="card-body ">
+                                <h5 className="card-title h3">Applied : {totalAppliedJob}</h5>
+                            </div>
+                        </div>
+                    }
+
+                    {totalInterviewingJob > 0 &&
+                        <div className="card text-bg-warning mb-3 me-2" style={{ maxWidth: '18rem' }}>
+                            <div className="card-body ">
+                                <h5 className="card-title h3">Interviewing : {totalInterviewingJob}</h5>
+                            </div>
+                        </div>
+                    }
+                    {totalRejectedJob > 0 &&
+                        <div className="card text-bg-danger mb-3" style={{ maxWidth: '18rem' }}>
+                            <div className="card-body ">
+                                <h5 className="card-title h3">Rejected : {totalRejectedJob}</h5>
+                            </div>
+                        </div>
+                    }
+
+                </div>
+                {!isFiltering  && jobs.length === 0 && !isLoading && <p className='text-muted mt-4  text-center'>No jobs applied yet. Add your first one!</p>}
+                {isFiltering && jobs.length === 0 && !isLoading && <p className='text-muted mt-4  text-center'>this status is empty</p>}
+
+                {
+                    jobs.length > 0 &&
+                    <JobTable
+                        jobs={jobs}
+                        inputref={inputref}
+                        setJobToEdit={setJobToEdit}
+                        handleSort={handleSort}
+                        setJobToDelete={setJobToDelete}
+                        getBadgeColor={getBadgeColor}
+                        getSortIcon={getSortIcon}
+                    />
+                }
+                {
+                    jobs.length>0 &&
+                    <Pagination
+                    currentPage={currentPage}
+                    setCurrentPage={setCurrentPage}
+                    totalPages={totalPages}
+                    totalAppliedJob={totalAppliedJob}
+                    totalRejectedJob={totalRejectedJob}
+                />
+                }
+                
+            </>
+        )
+    }
 
 
 
-export default Dashboard
+    export default Dashboard

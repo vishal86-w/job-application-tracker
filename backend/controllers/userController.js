@@ -29,14 +29,18 @@ export const loginUser = async (req, res) => {
       const token = jwt.sign({ userId: userExists._id }, "mySecretKey", {
         expiresIn: "1d",
       });
-      res
-        .status(200)
+
+    res.cookie('jwt',token,{
+      httpOnly:true,
+      maxAge:24*60*60*1000
+    })
+      res.status(200)
         .json({
           _id: userExists._id,
           firstName: userExists.firstName,
           lastName: userExists.lastName,
           email: userExists.email,
-          token,
+          
         });
     } else {
       res.status(400).json({ message: "Invalid credentials" });
@@ -45,3 +49,26 @@ export const loginUser = async (req, res) => {
     res.status(400).json({ message: "Invalid credentials" });
   }
 };
+
+
+export const getUserProfile = async(req,res)=>{
+  try{
+    const user = await User.findById(req.userId)
+    if(!user){
+      return res.status(404).json({message:'User not found'})
+    }
+    res.json({
+      _id: user._id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+    })
+  }catch(err){
+      return res.status(500).json({message:'Server error'})
+  }
+}
+
+export const logoutUser = async(req,res)=>{
+    res.clearCookie('jwt')
+    return res.status(200).json({message:"Logged out successfully"})
+}

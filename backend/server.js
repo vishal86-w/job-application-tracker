@@ -2,11 +2,17 @@ import 'dotenv/config'
 import express from 'express'
 import mongoose from 'mongoose'
 import userRoutes from './routes/userRoutes.js'
+import cors from 'cors'
+import cookieParser from 'cookie-parser'
 
 import jobRoutes from './routes/jobRoutes.js'
 
 const app = express()
-
+app.use(cookieParser())
+app.use(cors({
+    origin:"http://localhost:5173",
+    credentials:true
+}))
 app.use(express.json())
 
 app.use('/api/jobs',jobRoutes)
