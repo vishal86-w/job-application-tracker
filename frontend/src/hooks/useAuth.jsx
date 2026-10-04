@@ -32,6 +32,7 @@ const useAuth = () => {
         }
         catch(err){
             setError(err.response.data.message)
+            throw err
         }
         finally{
             setIsLoading(false)

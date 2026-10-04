@@ -32,15 +32,29 @@ const UserProfile = () => {
   }, [])
 
   if (loading) {
-    return <Spinner/>
+    return <Spinner />
   }
 
   return (
     <>
       {error && <div>{error}</div>}
-      <h1>Hello,{user.firstName + ' ' + user.lastName}</h1>
-      <h1>{user.email}</h1>
-      <button className="btn" onClick={() => navigate('/dashboard')}>return to dashboard</button>
+      <div className="container vh-100 ">
+        <button className="btn mt-3" onClick={() => navigate('/dashboard')}>return to dashboard</button>
+        <div className="row h-50   align-items-center justify-content-center">
+          <div className="col-12 col-md-6 col-lg-4">
+            <div className="card shadow text-center">
+              <div className="card-body ">
+                <h1>Hello,{user.firstName + ' ' + user.lastName}</h1>
+                <h1>{user.email}</h1>
+
+              </div>
+            </div>
+          </div>
+
+
+        </div>
+
+      </div>
 
     </>
   )

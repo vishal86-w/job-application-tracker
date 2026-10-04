@@ -119,7 +119,7 @@ import Spinner from '../components/Spinner.jsx'
                     handleDelete={handleDelete}
                 />
 
-                {isLoading && <p className='text-secondary mt-4'><Spinner/> Loading...</p>}
+                {isLoading && <div><Spinner/> <p className='text-secondary mt-4'> Loading...</p></div>}
 
                 <div className="d-flex justify-content-center">
                     {totalAppliedJob > 0 &&

@@ -22,10 +22,10 @@ const Register = () => {
         if(lastName===''){
             newErrors.lastName='Please enter your last name.'
         }
-        if(firstName===''){
+        if(email===''){
             newErrors.email='Please enter your email.'
         }
-        if(firstName===''){
+        if(password===''){
             newErrors.password='Please enter your password.'
         }
         if(Object.keys(newErrors).length>0){
@@ -40,12 +40,22 @@ const Register = () => {
             navigate('/dashboard')
         }
         catch(err){
-            // setError('')
+             setError(err.response.data.message)
+             setTimeout(()=>setError(''),3000)
         }
         
     }
     return (
         <>
+         {error &&
+                <div className="toast show position-fixed mt-3 top-0 start-50 translate-middle-x text-bg-danger  border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div className="d-flex ">
+                        <div className="toast-body">
+                            {error}
+                        </div>
+                        <button type="button" className="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                </div>}
             <div className="container vh-100">
                 <div className="row h-100 align-items-center">
                     <div className="col-6">
